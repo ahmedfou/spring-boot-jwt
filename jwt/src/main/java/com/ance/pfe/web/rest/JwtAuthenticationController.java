@@ -1,9 +1,12 @@
 package com.ance.pfe.web.rest;
 
 import com.ance.pfe.config.JwtTokenUtil;
+import com.ance.pfe.domain.User;
 import com.ance.pfe.dto.UserDTO;
 import com.ance.pfe.model.JwtRequest;
 import com.ance.pfe.model.JwtResponse;
+import com.ance.pfe.model.UserData;
+import com.ance.pfe.repository.UserRepository;
 import com.ance.pfe.service.impl.JwtUserDetailsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,12 +27,15 @@ public class JwtAuthenticationController {
 
     private final JwtUserDetailsService userDetailsService;
 
+    private final UserRepository userRepository;
+
     public JwtAuthenticationController(AuthenticationManager authenticationManager,
                                        JwtTokenUtil jwtTokenUtil,
-                                       JwtUserDetailsService userDetailsService) {
+                                       JwtUserDetailsService userDetailsService, UserRepository userRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtil = jwtTokenUtil;
         this.userDetailsService = userDetailsService;
+        this.userRepository = userRepository;
     }
 
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
@@ -42,7 +48,14 @@ public class JwtAuthenticationController {
 
         final String token = jwtTokenUtil.generateToken(userDetails);
 
-        return ResponseEntity.ok(new JwtResponse(token));
+        User user = userRepository.findByUsername(authenticationRequest.getUsername());
+
+        UserData userData = new UserData();
+
+        userData.setToken(token);
+        userData.setUserRole( user.getRole());
+
+        return ResponseEntity.ok(userData);
     }
 
     @PostMapping(value = "/register")

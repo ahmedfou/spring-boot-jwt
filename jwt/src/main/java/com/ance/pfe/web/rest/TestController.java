@@ -2,6 +2,8 @@ package com.ance.pfe.web.rest;
 
 import com.ance.pfe.domain.Test;
 import com.ance.pfe.service.ITestService;
+import com.mailjet.client.errors.MailjetException;
+import com.mailjet.client.errors.MailjetSocketTimeoutException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +19,7 @@ public class TestController {
     }
 
     @PostMapping("/createTest")
-    public Test createTest(@RequestBody Test test) {
+    public Test createTest(@RequestBody Test test) throws MailjetSocketTimeoutException, MailjetException {
         return itestService.createTest(test);
     }
 
@@ -40,6 +42,14 @@ public class TestController {
     public void deleteTest(@PathVariable Long id) {
         itestService.deleteTest(id);
     }
+
+
+    @PostMapping("/sendEmail")
+    public void sendEmail() throws MailjetSocketTimeoutException, MailjetException {
+        itestService.sendEmail("test");
+    }
+
+
 
 
 }
